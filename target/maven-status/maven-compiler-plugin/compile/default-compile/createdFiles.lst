@@ -1,0 +1,17 @@
+com\github\bigDataTools\hive\FieldInfo.class
+com\github\bigDataTools\hbase\HashChoreWoker.class
+com\github\bigDataTools\es\EsSearchManager.class
+com\github\bigDataTools\es\EsClient.class
+com\github\bigDataTools\hive\HiveTableStruct.class
+com\github\bigDataTools\hbase\HashRowKeyGenerator.class
+com\github\bigDataTools\hive\TableInfo.class
+com\github\bigDataTools\hbase\HbaseManager.class
+com\github\bigDataTools\hive\HiveTableManager.class
+com\github\bigDataTools\hive\FieldType.class
+com\github\bigDataTools\es\PageEntity.class
+com\github\bigDataTools\hbase\SplitKeysCalculator.class
+com\github\bigDataTools\hive\TableParamsCheckException.class
+com\github\bigDataTools\hive\CheckTableUtilsParams.class
+com\github\bigDataTools\hive\TableManager.class
+com\github\bigDataTools\hbase\RowKeyGenerator.class
+com\github\bigDataTools\hive\SparkJdbcUtil.class
