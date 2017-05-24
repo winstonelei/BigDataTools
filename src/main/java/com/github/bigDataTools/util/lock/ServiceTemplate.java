@@ -1,4 +1,4 @@
-package com.github.bigDataTools.zookeeper;
+package com.github.bigDataTools.util.lock;
 
 /**
  * 抽象服务接口

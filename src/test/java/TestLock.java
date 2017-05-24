@@ -1,5 +1,5 @@
-import com.github.bigDataTools.zookeeper.ServiceTemplate;
-import com.github.bigDataTools.zookeeper.LockService;
+import com.github.bigDataTools.util.lock.ServiceTemplate;
+import com.github.bigDataTools.util.lock.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

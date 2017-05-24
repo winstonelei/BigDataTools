@@ -1,4 +1,4 @@
-package com.github.bigDataTools.zookeeper;
+package com.github.bigDataTools.util.lock;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

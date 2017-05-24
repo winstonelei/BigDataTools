@@ -1,4 +1,4 @@
-package com.github.bigDataTools.zookeeper;
+package com.github.bigDataTools.util.lock;
 
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;

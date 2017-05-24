@@ -81,16 +81,16 @@ public class TestEsAggreation {
     public void  queryByArrage(){
 
 	  /*
-	                设置索引字段mapping
-	  	    	    XContentBuilder mapping = XContentFactory.jsonBuilder()
-					.startObject()
-					//properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
-					.startObject("properties")
-					.startObject("fieldA").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
-					.startObject("fieldB").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
-					.startObject("fieldC").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("fieldD").field("type", "string").endObject()
-					.endObject();*/
+        设置索引字段mapping
+        XContentBuilder mapping = XContentFactory.jsonBuilder()
+        .startObject()
+        //properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
+        .startObject("properties")
+        .startObject("fieldA").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+        .startObject("fieldB").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+        .startObject("fieldC").field("type", "string").field("index", "not_analyzed").endObject()
+        .startObject("fieldD").field("type", "string").endObject()
+        .endObject();*/
 
 	 /*
 	    按某个field group by查询count
@@ -241,7 +241,39 @@ public class TestEsAggreation {
 		  System.out.println("sumagg="+fieldValue);
 	  }*/
 
+/*
 
+        按某个field 和 date group by 并查询另一个filed的sum，时间统计图，时间间隔是1天。
+        SELECT
+        DATE(create_at), fieldA, SUM(fieldB)
+        from table
+        group by DATE(create_at), fieldA;
+
+        SearchRequestBuilder searchReq = client.prepareSearch("sample_index");
+        searchReq.setTypes("sample_types");
+        DateHistogramBuilder dhb = AggregationBuilders.dateHistogram("my_datehistogram").field("create_at").interval(DateHistogram.Interval.days(1));
+        TermsBuilder termsb_fa = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
+        termsb_fa.subAggregation(AggregationBuilders.sum("my_sum_fieldB").field("fieldB"));
+        dhb.subAggregation(termsb_fa);
+
+        searchReq.setQuery(QueryBuilders.matchAllQuery()).addAggregation(dhb);
+        SearchResponse searchRes = searchReq.execute().actionGet();
+
+        DateHistogram dateHist = searchRes.getAggregations().get("my_datehistogram");
+        for (DateHistogram.Bucket dateBucket : dateHist.getBuckets()) {
+            //DATE(create_at)
+            String create_at = dateentry.getKey();
+            Terms fieldATerms = dateBucket.getAggregations().get("my_fieldA");
+            for (Terms.Bucket filedABucket : fieldATerms.getBuckets()) {
+                //fieldA
+                String fieldAValue = filedABucket.getKey();
+
+                //SUM(fieldB)
+                Sum sumagg = filedABucket.getAggregations().get("my_sum_fieldB");
+                long sumFieldB = (long)sumagg.getValues();
+            }
+        }
+*/
 
 
     }

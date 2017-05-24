@@ -1,4 +1,4 @@
-package com.github.bigDataTools.zookeeper;
+package com.github.bigDataTools.util.lock;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
@@ -91,7 +91,7 @@ public class DistributedLock    {
     public  boolean checkMinPath() throws KeeperException, InterruptedException {
          List<String> subNodes = zk.getChildren(GROUP_PATH, false);
          Collections.sort(subNodes);
-         int index = subNodes.indexOf( selfPath.substring(GROUP_PATH.length()+1));
+         int index = subNodes.indexOf(selfPath.substring(GROUP_PATH.length()+1));
          switch (index){
              case -1:{
                  LOG.error(LOG_PREFIX_OF_THREAD+"本节点已不在了..."+selfPath);
