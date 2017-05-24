@@ -6,11 +6,13 @@ import java.util.*;
 
 import com.github.bigDataTools.hbase.HbaseManager;
 import com.google.common.collect.Lists;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
@@ -65,7 +67,7 @@ public class EsSearchManager {
 
 	public static EsSearchManager getInstance(){
 		if(null == esSearchManager ){
-			synchronized (HbaseManager.class){
+			synchronized (EsSearchManager.class){
 				esSearchManager = new EsSearchManager();
 			}
 		}
@@ -158,8 +160,19 @@ public class EsSearchManager {
 					.put("index.translog.flush_threshold_ops", 10000000)
 					.put("refresh_interval", refreshInterval)
 					.put("index.codec", "best_compression").build();
+
+			XContentBuilder mapping = XContentFactory.jsonBuilder()
+					.startObject()
+					//properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
+					.startObject("properties")
+					.startObject("fieldA").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+					.startObject("fieldB").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+					.startObject("fieldC").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("fieldD").field("type", "string").endObject()
+					.endObject();
+
 			CreateIndexResponse createIndxeResponse = getClient().admin().indices()
-					.prepareCreate(indexName).setSettings(settings).execute()
+					.prepareCreate(indexName).setSettings(settings).addMapping(type,mapping).execute()
 					.actionGet();
 			flag = createIndxeResponse.isAcknowledged();
 			LOG.info("返回值" + flag);
@@ -518,5 +531,66 @@ public class EsSearchManager {
 		}
 		return json;
 	}
-	
+	/*public void buildIndexMapping() throws Exception {
+		Map<String, Object> settings = new HashMap<>();
+		settings.put("number_of_shards", 4);//分片数量
+		settings.put("number_of_replicas", 0);//复制数量
+		settings.put("refresh_interval", "10s");//刷新时间
+
+		//在本例中主要得注意,ttl及timestamp如何用java ,这些字段的具体含义,请去到es官网查看
+		CreateIndexRequestBuilder cib = Es_Utils.client.admin().indices().prepareCreate(Es_Utils.LOGSTASH_YYYY_MM_DD);
+		cib.setSettings(settings);
+
+		XContentBuilder mapping = XContentFactory.jsonBuilder()
+				.startObject()
+				.startObject("we3r")//
+				.startObject("_ttl")//有了这个设置,就等于在这个给索引的记录增加了失效时间,
+				//ttl的使用地方如在分布式下,web系统用户登录状态的维护.
+				.field("enabled", true)//默认的false的
+				.field("default", "5m")//默认的失效时间,d/h/m/s 即天/小时/分钟/秒
+				.field("store", "yes")
+				.field("index", "not_analyzed")
+				.endObject()
+				.startObject("_timestamp")//这个字段为时间戳字段.即你添加一条索引记录后,自动给该记录增加个时间字段(记录的创建时间),搜索中可以直接搜索该字段.
+				.field("enabled", true)
+				.field("store", "no")
+				.field("index", "not_analyzed")
+				.endObject()
+				//properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
+				.startObject("properties")
+				.startObject("@timestamp").field("type", "long").endObject()
+				.startObject("name").field("type", "string").field("store", "yes").endObject()
+				.startObject("home").field("type", "string").field("index", "not_analyzed").endObject()
+				.startObject("now_home").field("type", "string").field("index", "not_analyzed").endObject()
+				.startObject("height").field("type", "double").endObject()
+				.startObject("age").field("type", "integer").endObject()
+				.startObject("birthday").field("type", "date").field("format", "YYYY-MM-dd").endObject()
+				.startObject("isRealMen").field("type", "boolean").endObject()
+				.startObject("location").field("lat", "double").field("lon", "double").endObject()
+				.endObject()
+				.endObject()
+				.endObject();
+		cib.addMapping(Es_Utils.LOGSTASH_YYYY_MM_DD_MAPPING, mapping);
+		cib.execute().actionGet();
+	}*/
+
+	public  void rangeQuery( String index, String type) {
+		// Query
+		RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("fieldB");
+		rangeQueryBuilder.gte(0);
+		rangeQueryBuilder.lte(100);
+		// Search
+		SearchRequestBuilder searchRequestBuilder = getClient().prepareSearch(index);
+		searchRequestBuilder.setTypes(type);
+		searchRequestBuilder.setQuery(rangeQueryBuilder);
+		// 执行
+		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+		// 结果
+		SearchHits hits = searchResponse.getHits();
+		LOG.info("execute hit:" + hits.totalHits());
+		for (SearchHit hit : hits) {
+			System.out.println(hit.getSource().toString());
+		}
+
+	}
 }
