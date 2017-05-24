@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.github.bigDataTools.hbase.HbaseManager;
 import com.google.common.collect.Lists;
+import org.apache.lucene.queryparser.xml.builders.RangeFilterBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -28,6 +29,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -593,4 +595,64 @@ public class EsSearchManager {
 		}
 
 	}
+
+  public void  queryByArrage(){
+
+	 /* SearchRequestBuilder searchReq = client.prepareSearch("testindex");
+	  searchReq.setTypes("testtypes");
+	  TermsBuilder termsb = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
+
+	  BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+	  boolQueryBuilder.must(QueryBuilders.termQuery("fieldC", "hoge"));
+	  boolQueryBuilder.must(QueryBuilders.rangeQuery("fieldB").from(20).to(100));
+	  boolQueryBuilder.must(QueryBuilders.termQuery("fieldD", "huga"));
+
+	  searchReq.setQuery(boolQueryBuilder).addAggregation(
+			  termsb);
+	  SearchResponse searchRes = searchReq.execute().actionGet();
+
+	  Terms fieldATerms = searchRes.getAggregations().get("my_fieldA");
+	  for (Terms.Bucket filedABucket : fieldATerms.getBuckets()) {
+		  //fieldA
+		  String fieldAValue = filedABucket.getKey().toString();
+
+		  //COUNT(fieldA)
+		  long fieldACount = filedABucket.getDocCount();
+
+		  System.out.println("fieldAValue="+fieldAValue);
+
+		  System.out.println("fieldACount="+fieldACount);
+	  }
+*/
+
+	  SearchRequestBuilder searchReq = client.prepareSearch("testindex");
+	  searchReq.setTypes("testtypes");
+
+	  TermsBuilder termsb_fa = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
+	  TermsBuilder termsb_fc = AggregationBuilders.terms("my_fieldC").field("fieldC").size(50);
+
+	  termsb_fc.subAggregation(AggregationBuilders.sum("my_sum_fieldB").field("fieldB"));
+	  termsb_fa.subAggregation(termsb_fc);
+
+	  searchReq.setQuery(QueryBuilders.matchAllQuery()).addAggregation(termsb_fa);
+	  SearchResponse searchRes = searchReq.execute().actionGet();
+
+	  Terms fieldATerms = searchRes.getAggregations().get("my_fieldA");
+	  for (Terms.Bucket filedABucket : fieldATerms.getBuckets()) {
+		  //fieldA
+		  String fieldAValue = filedABucket.getKey().toString();
+		  System.out.println("fieldAValue="+fieldAValue);
+		  Terms fieldCTerms = filedABucket.getAggregations().get("my_fieldC");
+		  for (Terms.Bucket filedCBucket : fieldCTerms.getBuckets()) {
+			  //fieldC
+			  String fieldCValue = filedCBucket.getKey().toString();
+			  System.out.println("fieldCValue="+fieldCValue);
+			  //SUM(fieldB)
+			  Sum sumagg = filedCBucket.getAggregations().get("my_sum_fieldB");
+			  long sumFieldB = (long)sumagg.getValue();
+			  System.out.println("sumFieldB="+sumFieldB);
+		  }
+	  }
+  }
+
 }

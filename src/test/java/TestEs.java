@@ -16,44 +16,23 @@ public class TestEs {
         try {
             List<Map<String,Object>> list = new ArrayList<>();
             Map<String,Object> map = new HashMap<>();
-            map.put("name","shanghai");
-            map.put("sex","woman");
-
-            Map<String,Object> map1 = new HashMap<>();
-            map1.put("name","beijing");
-            map1.put("sex","woman");
+            map.put("fieldA",100);
+            map.put("fieldB",22);
+            map.put("fieldC","hoge");
+            map.put("fieldD","huga");
             list.add(map);
-            list.add(map1);
-
-            // esSearchManager.buildList2Documents("testa","woman",list);//existsIndex("testaa");
-            List<String> keywords = new ArrayList<>();
-            keywords.add("beijing");
-
-            List<String> types = new ArrayList<>();
-            types.add("woman");
-            //types.add("woman");
-            List<String> indexs = new ArrayList<>();
-            indexs.add("testa");
-
-            List<String> fieldNames = new ArrayList<>();
-            fieldNames.add("name");
-    /*      PageEntity<JSONObject>  pg = esSearchManager.queryWithTerm(keywords,indexs,
-                    types,fieldNames,null,null,null,null,1,10);*/
-/*
-            List<JSONObject> jsonList = pg.getContents();
-            System.out.println(jsonList.toString());*/
-
-     /*       List<Terms.Bucket> buckets = esSearchManager.queryAggByType(keywords,indexs,
-                    types,fieldNames);
-
-            System.out.println(buckets.size());*/
-
-            PageEntity<JSONObject> pg  = esSearchManager.queryFulltext(keywords,
+          //  JSONObject jsonObject = new JSONObject(map);
+           // esSearchManager.buildIndex("testindex","testtypes");
+           // esSearchManager.buildDocument("testindex","testtypes","1111",jsonObject.toJSONString());//existsIndex("testaa");
+          //  esSearchManager.buildList2Documents("testindex","testtypes",list);
+         /*   PageEntity<JSONObject> pg  = esSearchManager.queryFulltext(keywords,
                     indexs, types, fieldNames,
                     null, 1,10);
             List<JSONObject> jsonList = pg.getContents();
-            System.out.println(jsonList.toString());
+            System.out.println(jsonList.toString());*/
 
+            //esSearchManager.rangeQuery("testindex","testtypes");
+            esSearchManager.queryByArrage();
 
         } catch (Exception e) {
             e.printStackTrace();
