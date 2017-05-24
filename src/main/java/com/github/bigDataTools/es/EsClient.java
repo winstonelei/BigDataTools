@@ -13,6 +13,12 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import com.google.common.collect.Lists;
 
 
+/***
+ *
+ * @author  winstone
+ *
+ */
+
 public class EsClient {
 
 	private static String clusterName="";

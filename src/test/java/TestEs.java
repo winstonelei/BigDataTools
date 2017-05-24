@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by dell on 2017/5/3.
+ * Created by winstone on 2017/5/3.
  */
 public class TestEs {
+
     public static  void main(String[] args){
+
         EsSearchManager esSearchManager = EsSearchManager.getInstance();
         try {
             List<Map<String,Object>> list = new ArrayList<>();
@@ -32,7 +34,25 @@ public class TestEs {
             System.out.println(jsonList.toString());*/
 
             //esSearchManager.rangeQuery("testindex","testtypes");
-            esSearchManager.queryByArrage();
+
+            List<String> keywords = new ArrayList<>();
+            keywords.add("huga");
+
+            List<String> types = new ArrayList<>();
+            types.add("testtypes");
+
+            List<String> indexs = new ArrayList<>();
+            indexs.add("testindex");
+
+            List<String> fieldNames = new ArrayList<>();
+            fieldNames.add("fieldD");
+
+            PageEntity<JSONObject>  pg = esSearchManager.queryWithTerm(keywords,indexs,
+                    types,fieldNames,null,null,null,null,1,10);
+
+            List<JSONObject> jsonList = pg.getContents();
+            System.out.println(jsonList.toString());
+
 
         } catch (Exception e) {
             e.printStackTrace();

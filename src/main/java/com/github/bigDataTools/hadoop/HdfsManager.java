@@ -16,6 +16,7 @@ import java.util.ResourceBundle;
 
 /**
  * Created by winstone on 2017/5/4.
+ * operate for hdfs
  */
 public class HdfsManager {
 
