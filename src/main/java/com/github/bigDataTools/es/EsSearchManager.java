@@ -36,6 +36,9 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
+/**
+ * @author  winstonelei
+ */
 public class EsSearchManager {
 
 	private final Logger LOG = LoggerFactory.getLogger(EsSearchManager.class);
