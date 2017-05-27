@@ -17,6 +17,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -169,7 +170,6 @@ public class EsSearchManager {
 					.put("index.translog.flush_threshold_ops", 10000000)
 					.put("refresh_interval", refreshInterval)
 					.put("index.codec", "best_compression").build();
-
 			CreateIndexResponse createIndxeResponse = getClient().admin().indices()
 					.prepareCreate(indexName).setSettings(settings).addMapping(type).execute()
 					.actionGet();
@@ -203,8 +203,6 @@ public class EsSearchManager {
 					.put("refresh_interval", refreshInterval)
 					.put("index.codec", "best_compression").build();
 
-
-
 			CreateIndexResponse createIndxeResponse = getClient().admin().indices()
 					.prepareCreate(indexName).setSettings(settings).addMapping(type,mapping).execute()
 					.actionGet();
@@ -225,12 +223,22 @@ public class EsSearchManager {
 	 * @throws NumberFormatException
 	 * @throws UnknownHostException
      */
-	public void buildDocument(String indexName, String type, String docId, String json) throws Exception {
+	public void buildDocumentWithDocId(String indexName, String type, String docId, String json) throws Exception {
 		getClient().prepareIndex(indexName, type, docId).setSource(json).execute()
 				.actionGet();
 	}
 
-
+	/**
+	 * 创建单条索引
+	 * @param indexName
+	 * @param type
+	 * @param json
+	 * @throws Exception
+     */
+	public void buildDocument(String indexName, String type, String json) throws Exception {
+		getClient().prepareIndex(indexName, type).setSource(json).execute()
+				.actionGet();
+	}
 	/**
 	 * 构造list集合索引数据
 	 * @param indexName
@@ -238,14 +246,11 @@ public class EsSearchManager {
 	 * @param list
      */
 	public  void buildList2Documents(String indexName, String type, List<Map<String,Object>> list) throws  Exception{
-
 		BulkRequestBuilder bulkRequest = getClient().prepareBulk();
-
 		for(Map<String,Object> map : list){
 			bulkRequest.add(getClient().prepareIndex(indexName, type)
 					.setSource(this.generateJson(map)));
 		}
-
 		BulkResponse bulkIndexResponse = bulkRequest.execute().actionGet();
 		if (bulkIndexResponse.hasFailures()) {
 			LOG.error(bulkIndexResponse.buildFailureMessage());
@@ -291,7 +296,6 @@ public class EsSearchManager {
 		long begin = System.currentTimeMillis();
 		PageEntity<JSONObject> result = execute(qb, fieldnames, allColumns,
 				indexs, types, pagenum, pagesize);
-
 		long end = System.currentTimeMillis();
 		LOG.info("query end cost:[{}]ms", end - begin);
 
@@ -319,13 +323,12 @@ public class EsSearchManager {
 			LOG.info("queryFull Text  == null");
 			return null;
 		}
-		LOG.info("query Fulltext begin");
+		LOG.info("Fulltext begin");
 		long begin = System.currentTimeMillis();
 		PageEntity<JSONObject> result = execute(qb, fieldNames,allColumns, indexs, types,
 				 pagenum, pagesize);
 		long end = System.currentTimeMillis();
 		LOG.info("query Fulltext end cost:[{}]ms", end - begin);
-
 		return result;
 	}
 
@@ -391,9 +394,7 @@ public class EsSearchManager {
 	 * @param types
 	 * @param fieldNames
 	 * @return
-	 * @throws NumberFormatException
-	 * @throws UnknownHostException
-     * @throws JSONException
+     * @throws Exception
      */
 	private BoolQueryBuilder buildFullText(List<String> keywords,
 			List<String> types, List<String> fieldNames)
@@ -540,6 +541,41 @@ public class EsSearchManager {
 			}
 		}
 		return tempString;
+	}
+
+	public void  test(){
+		SearchRequestBuilder searchRequestBuilder = getClient().prepareSearch("testindex").setTypes("testtype");
+		SearchResponse searchResponse=searchRequestBuilder.setQuery(QueryBuilders.matchPhraseQuery("fieldD", "bigData is magic"))
+				.setFrom(0).setSize(10).setExplain(true).execute().actionGet();
+		SearchHits hits = searchResponse.getHits();
+		for (int i = 0; i < hits.getHits().length; i++) {
+			System.out.println(hits.getHits()[i].getSourceAsString());
+		}
+
+		//matchPhraseQuery(field,text)函数，这个函数的参数有两个,其中对应text的部分是要解析的，例如，bigData is magic可能经过解析之后会解析成molong1208 以及blog然后再进行查询的
+		searchRequestBuilder.setQuery(QueryBuilders.matchPhraseQuery("fieldD", "bigData is magic"));
+
+		//词精确查询，fieldD 分词后包含 bigData的term的文档
+		searchRequestBuilder.setQuery(QueryBuilders.termQuery("fieldD", "bigData"));
+
+		//terms Query 多term查询，查询fieldD 包含 bigData  spark或storm 中的任何一个或多个的文档
+		searchRequestBuilder.setQuery(QueryBuilders.termsQuery("fieldD", "bigData","spark","storm"));
+
+		//范围查询字段fieldB 大于20并且小于50 包含上下界
+		searchRequestBuilder.setQuery(QueryBuilders.rangeQuery("filedB")
+				.gt("20").lt("50").includeLower(true).includeUpper(true));
+
+		// prefix query 匹配分词前缀 如果字段没分词，就匹配整个字段前缀
+		searchRequestBuilder.setQuery(QueryBuilders.prefixQuery("fieldD","spark"));
+
+		//wildcard query 通配符查询，支持* 任意字符串；？任意一个字符
+		searchRequestBuilder.setQuery(QueryBuilders.wildcardQuery("fieldD","spark*"));
+
+		//Fuzzy query 分词模糊查询，通过增加fuzziness 模糊属性，来查询term 如下 能够匹配 fieldD 为 spar park spark前或后加一个字母的term的 文档 fuzziness 的含义是检索的term 前后增加或减少n个单词的匹配查询，
+		searchRequestBuilder.setQuery(QueryBuilders.fuzzyQuery("fieldD","spark").fuzziness(Fuzziness.ONE));
+
+
+		//https://my.oschina.net/UpBoy/blog/703560
 	}
 
 	/**
