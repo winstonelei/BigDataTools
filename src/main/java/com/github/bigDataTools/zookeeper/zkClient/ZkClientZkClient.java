@@ -23,6 +23,19 @@ public class ZkClientZkClient extends AbstractZkClient<IZkChildListener, IZkData
 
     private volatile KeeperState state = KeeperState.SyncConnected;
 
+    protected String createPersistent(String path, boolean sequential) {
+        try {
+            if (sequential) {
+                return zkClient.createPersistentSequential(path, true);
+            } else {
+                zkClient.createPersistent(path, true);
+                return path;
+            }
+        } catch (ZkNodeExistsException ignored) {
+        }
+        return null;
+    }
+
     public ZkClientZkClient(Config config) {
         String registryAddress = config.getRegistryAddress();
         zkClient = new ZkClient(registryAddress, connectionTimeout);
@@ -44,19 +57,6 @@ public class ZkClientZkClient extends AbstractZkClient<IZkChildListener, IZkData
                 stateChanged(StateListener.RECONNECTED);
             }
         });
-    }
-
-    protected String createPersistent(String path, boolean sequential) {
-        try {
-            if (sequential) {
-                return zkClient.createPersistentSequential(path, true);
-            } else {
-                zkClient.createPersistent(path, true);
-                return path;
-            }
-        } catch (ZkNodeExistsException ignored) {
-        }
-        return null;
     }
 
     protected String createPersistent(String path, Object data, boolean sequential) {

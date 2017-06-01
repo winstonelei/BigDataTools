@@ -3,6 +3,7 @@ import com.github.bigDataTools.zookeeper.Config;
 import com.github.bigDataTools.zookeeper.ZkClient;
 import com.github.bigDataTools.zookeeper.ZookeeperTransporter;
 import com.github.bigDataTools.zookeeper.curator.CuratorZookeeperTransporter;
+import com.github.bigDataTools.zookeeper.zkClient.ZkClientZkClient;
 import com.github.bigDataTools.zookeeper.zkClient.ZkClientZookeeperTransporter;
 
 import java.util.List;
@@ -23,12 +24,12 @@ public class TestZk {
             e.printStackTrace();
         }*/
 
-        ZookeeperTransporter  zk = new CuratorZookeeperTransporter();
+        ZookeeperTransporter  zk = new ZkClientZookeeperTransporter();// CuratorZookeeperTransporter();
         Config config = new Config();
-        config.setRegistryAddress("114.55.253.15:2181");
+        config.setRegistryAddress("121.40.129.155:2181");
         ZkClient zkClient  = zk.connect(config);
 
-        List<String> list = zkClient.getChildren("/LTS");
+        List<String> list = zkClient.getChildren("/");
 
         for(String str : list){
             System.out.println(str);

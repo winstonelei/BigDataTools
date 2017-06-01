@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by dell on 2017/5/4.
+ * Created by winstone on 2017/5/4.
  */
 public class TestHdfs {
 
