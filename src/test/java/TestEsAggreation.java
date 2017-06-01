@@ -12,7 +12,6 @@ import org.elasticsearch.search.SearchHits;
 public class TestEsAggreation {
 
     /*
-
     public void buildIndexMapping() throws Exception {
 		Map<String, Object> settings = new HashMap<>();
 		settings.put("number_of_shards", 4);//分片数量
