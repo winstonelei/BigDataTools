@@ -6,11 +6,13 @@ import java.util.*;
 
 import com.github.bigDataTools.hbase.HbaseManager;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.xml.builders.RangeFilterBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -18,6 +20,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.common.util.concurrent.AtomicArray;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -26,7 +29,11 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
@@ -255,7 +262,6 @@ public class EsSearchManager {
 		if (bulkIndexResponse.hasFailures()) {
 			LOG.error(bulkIndexResponse.buildFailureMessage());
 		}
-
 	}
 
 	/**
@@ -270,7 +276,6 @@ public class EsSearchManager {
 			throws Exception {
 		getClient().prepareDelete(indexName, type, docId).execute().actionGet();
 	}
-
 
 	/**
 	 * term 查询（在查询的时候不分词，主要针对 人名 地名等特殊的词语）
@@ -375,10 +380,10 @@ public class EsSearchManager {
 				for (String field : dateFieldNames) {
 					RangeQueryBuilder rangeQb = QueryBuilders.rangeQuery(field);
 					if (startTime != null) {
-						rangeQb.from(startTime).includeLower(true);
+						rangeQb.gt(startTime).includeLower(true);
 					}
 					if (endTime != null) {
-						rangeQb.to(endTime).includeUpper(true);
+						rangeQb.lt(endTime).includeUpper(true);
 					}
 					qb.must(rangeQb);
 				}
@@ -386,7 +391,6 @@ public class EsSearchManager {
 		}
 		return qb;
 	}
-
 
 	/**
 	 * 构造多字段 全文搜索查询条件
@@ -423,7 +427,8 @@ public class EsSearchManager {
      * @throws Exception
      */
 	public List<Bucket> queryAggByType(List<String> keywords,
-											   List<String> indexs, List<String> types, List<String> fieldNames) throws Exception {
+									   List<String> indexs, List<String> types,
+									   List<String> fieldNames) throws Exception {
 		List<Bucket> bucketlist = Lists.newArrayList();
 		BoolQueryBuilder qb = buildTermQuery(keywords, types, fieldNames, null,
 				null, null);
@@ -572,8 +577,60 @@ public class EsSearchManager {
 		return json;
 	}
 
+	/**
+	 * 构建索引
+	 * @param tableName
+	 * @param typeName
+	 * @param fieldInfos
+	 * @param excludeFields
+     * @throws Exception
+     */
+	public void buildIndexWithFields(String tableName,
+									 String typeName,
+									 Map<String, String> fieldInfos,
+									 List<String> excludeFields
+	) throws Exception {
 
+		if (StringUtils.isBlank(typeName) || fieldInfos == null
+				|| fieldInfos.isEmpty()) {
+			return;
+		}
+		// 创建字段
+		JSONObject mappingJson = new JSONObject();
 
+		// _all
+		JSONObject allProperties = new JSONObject();
+		allProperties.put("enabled", "false");
+		mappingJson.put("_all", allProperties);
 
+		// _source
+		JSONObject sourceProperties = new JSONObject();
+		sourceProperties.put("excludes", excludeFields);
+		mappingJson.put("_source", sourceProperties);
+
+		// _time
+		JSONObject timeProperties = new JSONObject();
+		timeProperties.put("enabled", "true");
+		mappingJson.put("_timestamp", timeProperties);
+
+		JSONObject tableInfos = new JSONObject();
+		IndexFieldBuilder ib = new IndexFieldBuilder();
+		Iterator<Map.Entry<String, String>> it = fieldInfos.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, String> entry = it.next();
+			String name = entry.getKey();
+			String type = entry.getValue();
+			tableInfos.put(name, ib.buildFieldMapping(type, name));
+		}
+		mappingJson.put("properties", tableInfos);
+
+		CreateIndexResponse createIndxeResponse = getClient().admin().indices()
+				.prepareCreate(tableName).addMapping(typeName).setSource(mappingJson.toString()).execute()
+				.actionGet();
+
+		if (createIndxeResponse.isAcknowledged()) {
+			LOG.info("创建es索引表成功:" + typeName);
+		}
+	}
 
 }

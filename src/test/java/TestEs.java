@@ -4,13 +4,13 @@ import com.github.bigDataTools.es.PageEntity;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by winstone on 2017/5/3.
@@ -21,14 +21,79 @@ public class TestEs {
 
         EsSearchManager esSearchManager = EsSearchManager.getInstance();
         try {
+
+            //esSearchManager.testAggreation();
+
+            Map<String,String> fieldsInfo = new HashMap<>();
+            fieldsInfo.put("name","java.lang.String");
+            fieldsInfo.put("age","java.lang.Integer");
+            fieldsInfo.put("school","java.lang.String");
+            List<String> excludeFields = new ArrayList<>();
+            excludeFields.add("school");
+            esSearchManager.buildIndexWithFields("exindex","exindex", fieldsInfo, excludeFields);
+
             List<Map<String,Object>> list = new ArrayList<>();
+            Map<String,Object> map = new HashMap<>();
+            map.put("name","jack");
+            map.put("age",50);
+            map.put("school","qinghua");
+
+            Map<String,Object> map1 = new HashMap<>();
+            map1.put("name","sony");
+            map1.put("age",14);
+            map1.put("school","beijing");
+            list.add(map1);
+            esSearchManager.buildList2Documents("exindex","exindex",list);
+
+            List<String> keywords = new ArrayList<>();
+            keywords.add("mike");
+            List<String> types = new ArrayList<>();
+            types.add("exindex");
+            List<String> indexs = new ArrayList<>();
+            indexs.add("exindex");
+            List<String> fieldNames = new ArrayList<>();
+            fieldNames.add("name");
+
+
+            PageEntity<JSONObject> pg = esSearchManager.queryWithTerm(keywords, indexs,
+                    types, fieldNames, null, null, null, null, 1, 10);
+
+            List<JSONObject> jsonList = pg.getContents();
+
+            System.out.println(jsonList);
+
+/*
+            List<Map<String,Object>> list = new ArrayList<>();
+            Map<String,Object> map = new HashMap<>();
+            map.put("name","mike");
+            map.put("home","usa");
+            map.put("now_home","china");
+            map.put("height",33);
+            map.put("age",20);
+            map.put("birthday",new SimpleDateFormat("YYYYMMddHHmmss").format(new Date()));
+            map.put("isRealMen",true);
+
+            Map<String,Object> map1 = new HashMap<>();
+            map1.put("name","xap");
+            map1.put("home","france");
+            map1.put("now_home","france");
+            map1.put("height",23);
+            map1.put("age",55);
+            map1.put("birthday",new SimpleDateFormat("YYYYMMddHHmmss").format(new Date()));
+            map1.put("isRealMen",true);
+            list.add(map1);
+            list.add(map);
+             esSearchManager.buildList2Documents("tempindex","tempindex",list);
+*/
+
+            /*     List<Map<String,Object>> list = new ArrayList<>();
             Map<String,Object> map = new HashMap<>();
             map.put("fieldA",80);
             map.put("fieldB",30);
             map.put("fieldC","hoge");
             map.put("fieldD","huga");
             list.add(map);
-            JSONObject jsonObject = new JSONObject(map);
+            JSONObject jsonObject = new JSONObject(map);*/
           //  esSearchManager.buildIndex("testindex","testtypes");
             //esSearchManager.buildList2Documents("testindex","testtypes",list);
             //esSearchManager.buildDocument("testindex","testtypes","666",jsonObject.toString());
@@ -41,25 +106,10 @@ public class TestEs {
 
             //esSearchManager.rangeQuery("testindex","testtypes");
 
-            List<String> keywords = new ArrayList<>();
-            keywords.add("huga");
-
-            List<String> types = new ArrayList<>();
-            types.add("testtypes");
-
-            List<String> indexs = new ArrayList<>();
-            indexs.add("testindex");
-
-            List<String> fieldNames = new ArrayList<>();
-            fieldNames.add("fieldD");
-
-            PageEntity<JSONObject>  pg = esSearchManager.queryWithTerm(keywords,indexs,
-                    types,fieldNames,null,null,null,null,1,10);
-
-            List<JSONObject> jsonList = pg.getContents();
-            System.out.println(jsonList.toString());
+      /*
 
 
+*/
         } catch (Exception e) {
             e.printStackTrace();
         }
