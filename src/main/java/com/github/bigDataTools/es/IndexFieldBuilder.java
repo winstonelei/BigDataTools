@@ -24,31 +24,31 @@ public class IndexFieldBuilder {
 			String typeName = Class.forName(fieldType).getName();
 			// int类型
 			if (typeName.equals(IndexMappingType.INTTYPE)) {
-				jo.put("type", IndexMappingType.MAPPINGVALUES
+				jo.put("type", IndexMappingType.MAPPINGS
 						.get(IndexMappingType.INTTYPE));
 				jo.put("store", "no");
 			}else
 			// String类型
 			if (typeName.equals(IndexMappingType.STRINGTYPE)) {
-				jo.put("type", IndexMappingType.MAPPINGVALUES
+				jo.put("type", IndexMappingType.MAPPINGS
 						.get(IndexMappingType.STRINGTYPE));
 				jo.put("store", "no");
 			}else
 			// float类型
 			if (typeName.equals(IndexMappingType.FLOATTYPE)) {
-				jo.put("type", IndexMappingType.MAPPINGVALUES
+				jo.put("type", IndexMappingType.MAPPINGS
 						.get(IndexMappingType.FLOATTYPE));
 				jo.put("store", "no");
 			}else
 			// double类型
 			if (typeName.equals(IndexMappingType.DOUBLETYPE)) {
-				jo.put("type", IndexMappingType.MAPPINGVALUES
+				jo.put("type", IndexMappingType.MAPPINGS
 						.get(IndexMappingType.DOUBLETYPE));
 				jo.put("store", "no");
 			}else
 			// 时间类型
 			if (typeName.equals(IndexMappingType.TIMETYPE)) {
-				jo.put("type", IndexMappingType.MAPPINGVALUES
+				jo.put("type", IndexMappingType.MAPPINGS
 						.get(IndexMappingType.TIMETYPE));
 				jo.put("store", "no");
 			}else{

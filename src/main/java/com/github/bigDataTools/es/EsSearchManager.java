@@ -128,8 +128,7 @@ public class EsSearchManager {
 	 * 根据索引名称构建索引
 	 * @param indexName
 	 * @return
-	 * @throws NumberFormatException
-	 * @throws UnknownHostException
+	 * @throws Exception
      */
 	public Boolean buildIndex(String indexName) throws Exception {
 		IndicesExistsResponse response = getClient().admin().indices()
@@ -220,7 +219,72 @@ public class EsSearchManager {
 	}
 
 
+	/**
+	 * 构建索引根据字段映射
+	 * @param indexName
+	 * @param typeName
+	 * @param fieldInfos
+	 * @param excludeFields
+	 * @throws Exception
+	 */
+	public void buildIndexWithFields(String indexName,
+									 String typeName,
+									 Map<String, String> fieldInfos,
+									 List<String> excludeFields
+	) throws Exception {
 
+		IndicesExistsResponse response = getClient().admin().indices()
+				.prepareExists(indexName).execute().actionGet();
+
+		if (!response.isExists()) { //需要将配置放置到配置文件中
+
+			if (StringUtils.isBlank(typeName) || fieldInfos == null
+					|| fieldInfos.isEmpty()) {
+				return;
+			}
+			// 创建字段
+			JSONObject mappingJson = new JSONObject();
+
+			// _all
+			JSONObject allProperties = new JSONObject();
+			allProperties.put("enabled", false);
+			mappingJson.put("_all", allProperties);
+
+			// _source
+			JSONObject sourceProperties = new JSONObject();
+			sourceProperties.put("excludes", excludeFields);
+			//	sourceProperties.put("enabled", false);
+			mappingJson.put("_source", sourceProperties);
+
+			// _time
+			JSONObject timeProperties = new JSONObject();
+			timeProperties.put("enabled", "true");
+			mappingJson.put("_timestamp", timeProperties);
+
+			JSONObject tableInfos = new JSONObject();
+			IndexFieldBuilder ib = new IndexFieldBuilder();
+			Iterator<Map.Entry<String, String>> it = fieldInfos.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, String> entry = it.next();
+				String name = entry.getKey();
+				String type = entry.getValue();
+				tableInfos.put(name, ib.buildFieldMapping(type, name));
+			}
+			mappingJson.put("properties", tableInfos);
+
+			CreateIndexResponse createIndexResponse = getClient().admin().indices()
+					.prepareCreate(indexName).addMapping(typeName).setSource(mappingJson.toString()).execute()
+					.actionGet();
+
+			if (createIndexResponse.isAcknowledged()) {
+				LOG.info("创建es索引表成功:" + typeName);
+			}else{
+				LOG.error("创建es索引表失败!" + typeName);
+			}
+
+		}
+
+	}
 	/**
 	 * 构建索引数据
 	 * @param indexName
@@ -516,6 +580,8 @@ public class EsSearchManager {
 					fieldnames = allColumns;
 				}
 				for (String str : fieldnames) {
+					String docId = hit.getId();
+					LOG.info(docId);
 					obj.put(str, hit.getSource().get(str));
 				}
 				resultString.add(obj);
@@ -577,60 +643,6 @@ public class EsSearchManager {
 		return json;
 	}
 
-	/**
-	 * 构建索引
-	 * @param tableName
-	 * @param typeName
-	 * @param fieldInfos
-	 * @param excludeFields
-     * @throws Exception
-     */
-	public void buildIndexWithFields(String tableName,
-									 String typeName,
-									 Map<String, String> fieldInfos,
-									 List<String> excludeFields
-	) throws Exception {
 
-		if (StringUtils.isBlank(typeName) || fieldInfos == null
-				|| fieldInfos.isEmpty()) {
-			return;
-		}
-		// 创建字段
-		JSONObject mappingJson = new JSONObject();
-
-		// _all
-		JSONObject allProperties = new JSONObject();
-		allProperties.put("enabled", "false");
-		mappingJson.put("_all", allProperties);
-
-		// _source
-		JSONObject sourceProperties = new JSONObject();
-		sourceProperties.put("excludes", excludeFields);
-		mappingJson.put("_source", sourceProperties);
-
-		// _time
-		JSONObject timeProperties = new JSONObject();
-		timeProperties.put("enabled", "true");
-		mappingJson.put("_timestamp", timeProperties);
-
-		JSONObject tableInfos = new JSONObject();
-		IndexFieldBuilder ib = new IndexFieldBuilder();
-		Iterator<Map.Entry<String, String>> it = fieldInfos.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, String> entry = it.next();
-			String name = entry.getKey();
-			String type = entry.getValue();
-			tableInfos.put(name, ib.buildFieldMapping(type, name));
-		}
-		mappingJson.put("properties", tableInfos);
-
-		CreateIndexResponse createIndxeResponse = getClient().admin().indices()
-				.prepareCreate(tableName).addMapping(typeName).setSource(mappingJson.toString()).execute()
-				.actionGet();
-
-		if (createIndxeResponse.isAcknowledged()) {
-			LOG.info("创建es索引表成功:" + typeName);
-		}
-	}
 
 }

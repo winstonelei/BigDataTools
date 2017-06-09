@@ -5,19 +5,21 @@ import java.util.Map;
 
 /**
  * 索引映射类型
+ * @author winstone
+ *
  */
 public class IndexMappingType {
 	
-	public static final Map<String,String> MAPPINGVALUES = new HashMap<String,String>();
+	public static final Map<String,String> MAPPINGS = new HashMap<String,String>();
 	
 	static {
-		MAPPINGVALUES.put("java.lang.String", "string");
-		MAPPINGVALUES.put("java.lang.Integer", "integer");
-		MAPPINGVALUES.put("java.lang.Float", "float");
-		MAPPINGVALUES.put("java.lang.Double", "double");
-		MAPPINGVALUES.put("java.lang.Boolean", "boolean");
-		MAPPINGVALUES.put("java.lang.Character", "char");
-		MAPPINGVALUES.put("java.util.Date", "date");
+		MAPPINGS.put("java.lang.String", "string");
+		MAPPINGS.put("java.lang.Integer", "integer");
+		MAPPINGS.put("java.lang.Float", "float");
+		MAPPINGS.put("java.lang.Double", "double");
+		MAPPINGS.put("java.lang.Boolean", "boolean");
+		MAPPINGS.put("java.lang.Character", "char");
+		MAPPINGS.put("java.util.Date", "date");
 	}
 	
 	public static final String STRINGTYPE = "java.lang.String";

@@ -237,7 +237,6 @@ public class CuratorZkClient extends AbstractZkClient<CuratorZkClient.PathChildr
                 @Override
                 public void childEvent(CuratorFramework c, PathChildrenCacheEvent event)
                         throws Exception {
-
                     switch (event.getType()) {
                         case CHILD_ADDED:
                         case CHILD_REMOVED:

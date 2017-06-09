@@ -23,40 +23,44 @@ public class TestEs {
         try {
 
             //esSearchManager.testAggreation();
-
-            Map<String,String> fieldsInfo = new HashMap<>();
+          /*  Map<String,String> fieldsInfo = new HashMap<>();
             fieldsInfo.put("name","java.lang.String");
             fieldsInfo.put("age","java.lang.Integer");
             fieldsInfo.put("school","java.lang.String");
             List<String> excludeFields = new ArrayList<>();
             excludeFields.add("school");
             esSearchManager.buildIndexWithFields("exindex","exindex", fieldsInfo, excludeFields);
-
-            List<Map<String,Object>> list = new ArrayList<>();
+*/
+ /*   */
+        /*    List<Map<String,Object>> list = new ArrayList<>();
             Map<String,Object> map = new HashMap<>();
             map.put("name","jack");
             map.put("age",50);
-            map.put("school","qinghua");
+            map.put("school","ByteTCC Transaction Manager旨在提供一个兼容JTA的基于TCC机制的分布式事务管理器");
 
             Map<String,Object> map1 = new HashMap<>();
             map1.put("name","sony");
             map1.put("age",14);
-            map1.put("school","beijing");
+            map1.put("school","支付宝在扣款事务提交之前，向实时消息服务请求发送消息，实时消息服务只记录消息数据，而不真正发送，只有消息发送成功后才会提交事务");
             list.add(map1);
-            esSearchManager.buildList2Documents("exindex","exindex",list);
+            list.add(map);
+            esSearchManager.buildList2Documents("testindex","testindex",list);*/
 
             List<String> keywords = new ArrayList<>();
-            keywords.add("mike");
+            keywords.add("ByteTCC");
             List<String> types = new ArrayList<>();
-            types.add("exindex");
+            types.add("testindex");
             List<String> indexs = new ArrayList<>();
-            indexs.add("exindex");
+            indexs.add("testindex");
             List<String> fieldNames = new ArrayList<>();
-            fieldNames.add("name");
+            fieldNames.add("school");
 
+            PageEntity<JSONObject> pg = esSearchManager.queryFulltext(keywords,
+                    indexs, types, fieldNames, null, 1,10);
 
-            PageEntity<JSONObject> pg = esSearchManager.queryWithTerm(keywords, indexs,
+     /*       PageEntity<JSONObject> pg = esSearchManager.queryWithTerm(keywords, indexs,
                     types, fieldNames, null, null, null, null, 1, 10);
+                    */
 
             List<JSONObject> jsonList = pg.getContents();
 
@@ -105,7 +109,6 @@ public class TestEs {
             System.out.println(jsonList.toString());*/
 
             //esSearchManager.rangeQuery("testindex","testtypes");
-
       /*
 
 

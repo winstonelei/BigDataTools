@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
  */
 public class PageEntity<E> implements Serializable {
 
-	private static final long serialVersionUID = -3964179135652952236L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 总记录数

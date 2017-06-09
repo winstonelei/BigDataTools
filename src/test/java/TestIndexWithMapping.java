@@ -1,6 +1,8 @@
 import com.alibaba.fastjson.JSONObject;
 import com.github.bigDataTools.es.EsSearchManager;
 import com.github.bigDataTools.es.PageEntity;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class TestIndexWithMapping {
 
         try {
 
-   /*     XContentBuilder mapping = XContentFactory.jsonBuilder()
+             XContentBuilder mapping = XContentFactory.jsonBuilder()
                     .startObject()
                     //properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
                     .startObject("properties")
@@ -46,11 +48,11 @@ public class TestIndexWithMapping {
                     .startObject("height").field("type", "double").endObject()
                     .startObject("age").field("type", "integer").endObject()
                     .startObject("birthday").field("type", "date").field("format", "YYYYMMddHHmmss").endObject()
-                    .startObject("isRealMen").field("type", "boolean").endObject()
+                    .startObject("content").field("type", "string").endObject()
                     .endObject()
                     .endObject();
 
-            esSearchManager.buildIndexWithMapping("tempindex","tempindex",mapping);*/
+            esSearchManager.buildIndexWithMapping("tempindex","tempindex",mapping);
 
             List<String> keywords = new ArrayList<>();
             keywords.add("france");

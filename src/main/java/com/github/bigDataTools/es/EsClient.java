@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 /***
  *
  * @author  winstone
+ * 构建 es 客户端
  *
  */
 

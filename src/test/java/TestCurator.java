@@ -15,6 +15,7 @@ public class TestCurator {
 
 
     public static void main(String[] args) throws Exception {
+
         final CuratorFramework client = CuratorFrameworkFactory.builder()
                 .connectString("114.55.253.15:2181")
                 .sessionTimeoutMs(5000)
