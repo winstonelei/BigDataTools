@@ -55,7 +55,7 @@ public class EsSearchManager {
 
 	private final Logger LOG = LoggerFactory.getLogger(EsSearchManager.class);
 
-	private Client client;
+	public Client client;
 
 	private void init() throws Exception {
 		client = EsClient.getClient();
