@@ -1,6 +1,9 @@
 import com.github.bigDataTools.es.EsSearchManager;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -11,12 +14,126 @@ import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInter
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.Avg;
+import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
+import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
+import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wistone  on 2017/5/24.
  */
 public class TestEsAggreation {
+
+
+    public static void main(String[] args){
+        EsSearchManager esSearchManager = EsSearchManager.getInstance();
+        try {
+            SearchRequestBuilder searchReq = esSearchManager.client.prepareSearch("tempindex");
+            searchReq.setTypes("tempindex");
+
+            TermsBuilder termsb = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
+
+            //过滤条件
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("fieldA").from(20).to(100));
+
+            searchReq.setQuery(boolQueryBuilder).addAggregation(termsb);
+            SearchResponse searchRes = searchReq.execute().actionGet();
+
+            Terms fieldATerms = searchRes.getAggregations().get("my_fieldA");
+            for (Terms.Bucket filedABucket : fieldATerms.getBuckets()) {
+                //fieldA
+                String fieldAValue = filedABucket.getKey().toString();
+
+                //COUNT(fieldA)
+                long fieldACount = filedABucket.getDocCount();
+
+                System.out.println("fieldAValue="+fieldAValue);
+
+                System.out.println("fieldACount="+fieldACount);
+            }
+
+            /*for (Terms.Bucket filedABucket : fieldATerms.getBuckets()) {
+                //fieldA
+                String key = filedABucket.getKey().toString();
+                //COUNT(fieldA)
+                long  value = filedABucket.getDocCount();
+
+                System.out.println("fieldAValue="+key);
+
+                System.out.println("fieldACount="+value);
+            }
+*/
+
+
+            /*XContentBuilder mapping = XContentFactory.jsonBuilder()
+                    .startObject()
+                    //properties下定义的name等等就是属于我们需要的自定义字段了,相当于数据库中的表字段 ,此处相当于创建数据库表
+                    .startObject("properties")
+                    .startObject("fieldA").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+                    .startObject("fieldB").field("type", "integer").field("store", "yes").field("index", "not_analyzed").endObject()
+                    .startObject("fieldC").field("type", "string").field("index", "not_analyzed").endObject()
+                    .startObject("fieldD").field("type", "string").endObject()
+                    .endObject();
+
+            esSearchManager.buildIndexWithMapping("tempindex", "tempindex", mapping);*/
+
+
+ /*
+            List<Map<String,Object>> list = new ArrayList<>();
+            Map<String,Object> map1 = new HashMap<>();
+            map1.put("fieldA",10);
+            map1.put("fieldB",20);
+            map1.put("fieldC","java");
+            map1.put("fieldD","java 编程技术");
+
+            Map<String,Object> map2 = new HashMap<>();
+            map2.put("fieldA",15);
+            map2.put("fieldB",25);
+            map2.put("fieldC","ptyhone");
+            map2.put("fieldD","python算法");
+
+
+            Map<String,Object> map3 = new HashMap<>();
+            map3.put("fieldA",25);
+            map3.put("fieldB",35);
+            map3.put("fieldC","c++");
+            map3.put("fieldD","c++核心思想");
+*/
+
+       /*     Map<String,Object> map4 = new HashMap<>();
+            map4.put("fieldA",10);
+            map4.put("fieldB",20);
+            map4.put("fieldC","java");
+            map4.put("fieldD","java基础语法");
+
+            Map<String,Object> map5 = new HashMap<>();
+            map5.put("fieldA",10);
+            map5.put("fieldB",20);
+            map5.put("fieldC","java");
+            map5.put("fieldD","spark大数据");
+
+            *//*list.add(map1);
+            list.add(map2);
+            list.add(map3);
+*//*
+            list.add(map4);
+            list.add(map5);
+
+            esSearchManager.buildList2Documents("tempindex","tempindex",list);
+*/
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
     /*
      XContentBuilder mapping = XContentFactory.jsonBuilder()
@@ -56,6 +173,9 @@ public class TestEsAggreation {
     */
 
     public void  queryByArrage(){
+
+
+
 
 	  /*
         设置索引字段mapping
