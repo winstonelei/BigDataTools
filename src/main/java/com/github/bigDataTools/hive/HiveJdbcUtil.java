@@ -13,13 +13,13 @@ import java.util.Map;
 /**
  * Created by winstone on 2016/11/18.
  */
-public class SparkJdbcUtil {
+public class HiveJdbcUtil {
 
-    private static final Log logger = LogFactory.getLog(SparkJdbcUtil.class);
+    private static final Log logger = LogFactory.getLog(HiveJdbcUtil.class);
 
-    private  static SparkJdbcUtil sparkJdbcUtil;
+    private  static HiveJdbcUtil hiveJdbcUtil;
 
-    private  final static String  sparkThriftUrl = "jdbc:hive2://ip:port/";
+    private  final static String  hiveThriftUrl = "jdbc:hive2://ip:port/";
 
     private  final static String driverName = "org.apache.hive.jdbc.HiveDriver";
 
@@ -32,19 +32,19 @@ public class SparkJdbcUtil {
     private List<String> urls;
 
 
-    private SparkJdbcUtil() throws  Exception{
+    private HiveJdbcUtil() throws  Exception{
         urls = Lists.newArrayList();
         Class.forName(driverName);
     }
 
 
-    public static SparkJdbcUtil getInstance()throws Exception{
-        if(sparkJdbcUtil == null){
-            synchronized (SparkJdbcUtil.class){
-                sparkJdbcUtil = new SparkJdbcUtil();
+    public static HiveJdbcUtil getInstance()throws Exception{
+        if(hiveJdbcUtil == null){
+            synchronized (HiveJdbcUtil.class){
+                hiveJdbcUtil = new HiveJdbcUtil();
             }
         }
-        return  sparkJdbcUtil;
+        return  hiveJdbcUtil;
     }
 
     public Connection getConnection()throws Exception{
@@ -190,32 +190,29 @@ public class SparkJdbcUtil {
         return list;
     }
 
-    public static String getPassWord() {
+    public  String getPassWord() {
         return passWord;
     }
 
-    public static void setPassWord(String passWord) {
-        SparkJdbcUtil.passWord = passWord;
+    public  void setPassWord(String passWord) {
+        HiveJdbcUtil.passWord = passWord;
     }
 
-    public static SparkJdbcUtil getSparkJdbcUtil() {
-        return sparkJdbcUtil;
+    public static HiveJdbcUtil getHiveJdbcUtil() {
+        return hiveJdbcUtil;
     }
 
-    public static void setSparkJdbcUtil(SparkJdbcUtil sparkJdbcUtil) {
-        SparkJdbcUtil.sparkJdbcUtil = sparkJdbcUtil;
+    public static void setHiveJdbcUtil(HiveJdbcUtil hiveJdbcUtil) {
+        HiveJdbcUtil.hiveJdbcUtil = hiveJdbcUtil;
     }
 
-    public static String getSparkThriftUrl() {
-        return sparkThriftUrl;
-    }
 
     public String getUrl() {
         return url;
     }
 
     public void setUrl(String ip,String port) {
-        String sparkUrl = sparkThriftUrl.replace("ip", ip).replace("port", port);
+        String sparkUrl = hiveThriftUrl.replace("ip", ip).replace("port", port);
         this.url = sparkUrl;
         this.urls.add(url);
     }
@@ -228,12 +225,12 @@ public class SparkJdbcUtil {
         this.urls = urls;
     }
 
-    public static String getUserName() {
+    public  String getUserName() {
         return userName;
     }
 
-    public static void setUserName(String userName) {
-        SparkJdbcUtil.userName = userName;
+    public  void setUserName(String userName) {
+        HiveJdbcUtil.userName = userName;
     }
 
     public static void main(String[] args)throws Exception{

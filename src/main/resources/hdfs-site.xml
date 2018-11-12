@@ -17,12 +17,14 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-         <property>  
-		<name>dfs.replication</name>
-		<value>1</value>
-	</property>
-        <property>
-            <name>dfs.permissions</name>
-            <value>false</value>
-        </property>  
+    <!-- 设置dfs副本数，不设置默认是3个   -->
+    <property>
+        <name>dfs.replication</name>
+        <value>2</value>
+    </property>
+    <!-- 设置secondname的端口   -->
+    <property>
+        <name>dfs.namenode.secondary.http-address</name>
+        <value>node2:50090</value>
+    </property>
 </configuration>

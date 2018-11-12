@@ -23,16 +23,15 @@ public class TestEs {
         try {
 
             //esSearchManager.testAggreation();
-          /*  Map<String,String> fieldsInfo = new HashMap<>();
-            fieldsInfo.put("name","java.lang.String");
+           Map<String,String> fieldsInfo = new HashMap<>();
+     /*       fieldsInfo.put("name","java.lang.String");
             fieldsInfo.put("age","java.lang.Integer");
             fieldsInfo.put("school","java.lang.String");
             List<String> excludeFields = new ArrayList<>();
             excludeFields.add("school");
             esSearchManager.buildIndexWithFields("exindex","exindex", fieldsInfo, excludeFields);
 */
- /*   */
-        /*    List<Map<String,Object>> list = new ArrayList<>();
+           List<Map<String,Object>> list = new ArrayList<>();
             Map<String,Object> map = new HashMap<>();
             map.put("name","jack");
             map.put("age",50);
@@ -44,7 +43,7 @@ public class TestEs {
             map1.put("school","支付宝在扣款事务提交之前，向实时消息服务请求发送消息，实时消息服务只记录消息数据，而不真正发送，只有消息发送成功后才会提交事务");
             list.add(map1);
             list.add(map);
-            esSearchManager.buildList2Documents("testindex","testindex",list);*/
+            esSearchManager.buildList2Documents("testindex","testindex",list);
 
             List<String> keywords = new ArrayList<>();
             keywords.add("ByteTCC");
