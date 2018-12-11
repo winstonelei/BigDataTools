@@ -134,12 +134,23 @@
         </dependency>
 
         <!--curator-->
-        <dependency>
+       <!-- <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <scope>provided</scope>
-            <!--<version>3.2.1</version>-->
+            &lt;!&ndash;<version>3.2.1</version>&ndash;&gt;
             <version>2.5.0</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>2.11.1</version>
         </dependency>
 
         <!--zkClient-->
@@ -183,6 +194,21 @@
             <artifactId>kryo-shaded</artifactId>
             <version>4.0.2</version>
         </dependency>
+
+        <!--presto-->
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-jdbc</artifactId>
+            <version>0.214</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 
