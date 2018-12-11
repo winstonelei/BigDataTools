@@ -23,8 +23,9 @@ public class TestHiveJdbc {
         hiveJdbcUtil.setUserName("root");
         hiveJdbcUtil.setPassWord("123");
         Connection connection = hiveJdbcUtil.getConnection();
-        //List<Map<String, Object>> resList = hiveJdbcUtil.querySqlForKeyValue("select * from fz_external_table");
-        List<Map<String, Object>> resList = hiveJdbcUtil.querySqlForKeyValue("select count(*) as totalCount from fz_external_table");
+        List<Map<String, Object>> resList = hiveJdbcUtil.querySqlForKeyValue("select * from fz_external_table");
+      //  List<Map<String, Object>> resList = hiveJdbcUtile.id=3, fz_external_table.age=24}
+        //{fz_external_table.name=test1, fz_external_table.tel=1111111111, fz_external_table.id=4, fz_external_table.age=22}l.querySqlForKeyValue("select count(*) as totalCount from fz_external_table");
         long endTime = System.currentTimeMillis();
         System.out.println("costTime="+(endTime-startTime));
         resList.stream().forEach(item->{

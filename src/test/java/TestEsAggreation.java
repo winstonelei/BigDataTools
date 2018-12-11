@@ -345,6 +345,7 @@ public class TestEsAggreation {
 		DATE(create_at), fieldA, SUM(fieldB)
 		from table
 		group by DATE(create_at), fieldA;
+
         SearchRequestBuilder searchReq = getClient().prepareSearch("tempindex");
         searchReq.setTypes("tempindex");
         DateHistogramBuilder dhb = AggregationBuilders.dateHistogram("my_datehistogram").field("birthday").interval(DateHistogramInterval.DAY);

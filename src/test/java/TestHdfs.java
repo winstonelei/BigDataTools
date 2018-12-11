@@ -16,21 +16,19 @@ public class TestHdfs {
             String ipPath="hdfs://hadoop16:9000/ppp.mp4";
             boolean flag = HdfsManager.downloadFile(ipPath,localPath,true);*/
 
-/*
 
-            String localPath="D:\\BaiduNetdiskDownload\\bb.txt";
-            String hdfsPath="hdfs://node1:9000/";
+/*            String localPath="D:\\BaiduNetdiskDownload\\bb.txt";
+            String hdfsPath="hdfs://node1:9000/user/hive/test.txt";
             File file = new File(localPath);
             boolean flag = HdfsManager.uploadFile(file, hdfsPath,true);
-            System.out.println(flag);
-*/
+            System.out.println(flag);*/
 
 
-            String textTdfsPath="hdfs://node1:9000/bb.txt";
-            HdfsManager.createAndAppendFile(textTdfsPath,"xiaoming nihao  xiaoli hello");
+            String textTdfsPath="hdfs://node1:9000/data/damddos/damddosWafAttackCount.txt";
+            HdfsManager.createAndAppendFile(textTdfsPath,"中国,Passthrough,2,11,浙江,gooann.cn,www,28,1534867200055,1535216400000,4242,1534867800055");
 
             String str = HdfsManager.getHdfsText(textTdfsPath);
-            System.out.println(str);
+ /*           System.out.println(str);*/
         } catch (Exception e) {
             e.printStackTrace();
         }

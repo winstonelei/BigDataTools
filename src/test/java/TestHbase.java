@@ -16,16 +16,16 @@ public class TestHbase {
         System.out.println(dateTime);
         HbaseManager util = HbaseManager.getInstance();
         try {
-            util.dropTable("testsplit1");
-            util.createTableWithSplits("testsplit1","ta");
+          //  util.dropTable("testsplit");
+           // util.createTable("firsttable","ceshi");
             long startTime = System.currentTimeMillis();
             System.out.println("start time ="+startTime);
-            for(int i=0;i<10;i++){
+            for(int i=10;i<100000;i++){
                 String rowKey= MD5Hash.getMD5AsHex(Bytes.toBytes(System.currentTimeMillis()));
                 int rowKeyLength = rowKey.length()/2;
                 System.out.println(rowKey);
-                util.insert("testsplit1",rowKey.substring(0,rowKeyLength),"ta","name","xiaoming"+i);
-                util.insert("testsplit1",rowKey.substring(0,rowKeyLength),"ta","sex","xiaoming"+i);
+                util.insert("firsttable",rowKey.substring(0,rowKeyLength),"ceshi","name","xiaoming"+i);
+                util.insert("firsttable",rowKey.substring(0,rowKeyLength),"ceshi","sex","xiaoming"+i);
             }
             long endTime = System.currentTimeMillis();
             System.out.println("end time = "+endTime);
