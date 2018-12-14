@@ -7,38 +7,23 @@ import java.util.*;
 import com.github.bigDataTools.hbase.HbaseManager;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.queryparser.xml.builders.RangeFilterBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.unit.Fuzziness;
-import org.elasticsearch.common.util.concurrent.AtomicArray;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.aggregations.metrics.avg.Avg;
-import org.elasticsearch.search.aggregations.metrics.sum.Sum;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +124,7 @@ public class EsSearchManager {
 		String shards = rb.getString("shards");
 		String refreshInterval = rb.getString("refreshInterval");
 		if (!response.isExists()) { //需要将配置放置到配置文件中
-			Settings settings = Settings.settingsBuilder()
+			Settings settings = Settings.builder()
 					.put("number_of_replicas", Integer.parseInt(replicas))
 					.put("number_of_shards", Integer.parseInt(shards))
 					.put("index.translog.flush_threshold_ops", 10000000)
@@ -170,7 +155,7 @@ public class EsSearchManager {
 		String shards = rb.getString("shards");
 		String refreshInterval = rb.getString("refreshInterval");
 		if (!response.isExists()) { //需要将配置放置到配置文件中
-			Settings settings = Settings.settingsBuilder()
+			Settings settings = Settings.builder()
 					.put("number_of_replicas", Integer.parseInt(replicas))
 					.put("number_of_shards", Integer.parseInt(shards))
 					.put("index.translog.flush_threshold_ops", 10000000)
@@ -202,7 +187,7 @@ public class EsSearchManager {
 		String shards = rb.getString("shards");
 		String refreshInterval = rb.getString("refreshInterval");
 		if (!response.isExists()) { //需要将配置放置到配置文件中
-			Settings settings = Settings.settingsBuilder()
+			Settings settings = Settings.builder()
 					.put("number_of_replicas", Integer.parseInt(replicas))
 					.put("number_of_shards", Integer.parseInt(shards))
 					.put("index.translog.flush_threshold_ops", 10000000)
@@ -501,7 +486,7 @@ public class EsSearchManager {
 			return null;
 		}
 		// 根据_type分组聚合
-		TermsBuilder aggregation = AggregationBuilders
+		TermsAggregationBuilder aggregation = AggregationBuilders
 				.terms("agg_group").field("_type");
 
 		String[] typeArry = types.toArray(new String[0]);

@@ -1,4 +1,5 @@
 import com.github.bigDataTools.hadoop.HdfsManager;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +8,14 @@ import java.io.IOException;
  * Created by winstone on 2017/5/4.
  */
 public class TestHdfs {
+
+    @Test
+    public void testUploadFile()throws  Exception{
+        String textTdfsPath="hdfs://node1:9000/data/damddos/damddosWafAttackCount.txt";
+        HdfsManager.createAndAppendFile(textTdfsPath,"中国,Passthrough,2,11,浙江,gooann.cn,www,28,1534867200055,1535216400000,4242,1534867800055");
+        String str = HdfsManager.getHdfsText(textTdfsPath);
+    }
+
 
     public static void main(String[] args) {
 
@@ -26,7 +35,6 @@ public class TestHdfs {
 
             String textTdfsPath="hdfs://node1:9000/data/damddos/damddosWafAttackCount.txt";
             HdfsManager.createAndAppendFile(textTdfsPath,"中国,Passthrough,2,11,浙江,gooann.cn,www,28,1534867200055,1535216400000,4242,1534867800055");
-
             String str = HdfsManager.getHdfsText(textTdfsPath);
  /*           System.out.println(str);*/
         } catch (Exception e) {

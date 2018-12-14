@@ -3,11 +3,18 @@ import com.github.bigDataTools.es.EsSearchManager;
 import com.github.bigDataTools.es.PageEntity;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.DateTimeZone;
+import org.junit.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,6 +23,37 @@ import java.util.*;
  * Created by winstone on 2017/5/3.
  */
 public class TestEs {
+
+    @Test
+    public void testEsQuery()throws  Exception{
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        EsSearchManager esSearchManager = EsSearchManager.getInstance();
+        Client client = esSearchManager.client;
+        long start = System.currentTimeMillis();
+        SearchRequestBuilder searchReq = client.prepareSearch("fw_session_table_statistics_v1_*");
+        searchReq.setTypes("fw_session_table_statistics_v1");
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        Date date=sdf.parse("2018-12-13 23:59:00");
+        Date timeEnd = date;//model.getTimeBegin();
+        Date  timeBegin= sdf.parse("2018-12-13 00:00:00");//addHour(timeEnd,-2);
+        if (timeBegin != null || timeEnd != null) {
+            RangeQueryBuilder timeRangeQuery = QueryBuilders.rangeQuery("collectTime");
+            if (timeBegin != null) {
+                timeRangeQuery.gte(timeBegin.getTime());
+            }
+            if (timeEnd != null) {
+                timeRangeQuery.lte(timeEnd.getTime());
+            }
+            boolQueryBuilder.must(timeRangeQuery);//.must(QueryBuilders.termQuery("globalDeviceId",28));;
+        }
+        searchReq.setQuery(boolQueryBuilder).setSize(1000).addSort("collectTime", SortOrder.DESC);
+        SearchResponse searchRes = searchReq.execute().actionGet();
+        for (SearchHit searchHit : searchRes.getHits().getHits()) {
+            System.out.println(sdf.format(new Date(Long.valueOf(searchHit.getSource().get("collectTime").toString())))+"="+searchHit.getSource());
+        }
+        System.out.println("总耗时：" + (System.currentTimeMillis()-start) + "ms"+ DateTimeZone.getDefault());
+
+    }
 
     public static  void main(String[] args){
 

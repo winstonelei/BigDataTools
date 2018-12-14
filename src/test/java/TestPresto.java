@@ -23,7 +23,6 @@ public class TestPresto {
         Connection connection = DriverManager.getConnection("jdbc:presto://192.168.130.14:8080/hive/default","root","");  ;
         Statement stmt = connection.createStatement();
         //  ResultSet rs = stmt.executeQuery("select count(*) from fz_external_table_withtime");  select sum(income) as income,sum(expenses) as expenses from trade_detail
-
         ResultSet rs = stmt.executeQuery("select sum(income) as income,sum(expenses) as expenses from trade_detail");
         while (rs.next()) {
             System.out.println(rs.getString(1));

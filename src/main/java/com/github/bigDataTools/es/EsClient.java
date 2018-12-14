@@ -11,6 +11,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import com.google.common.collect.Lists;
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 
 
 /***
@@ -52,10 +53,11 @@ public class EsClient {
 		if (StringUtils.isNotBlank(esClientPortStr)) {
 			esClientPort = Integer.parseInt(esClientPortStr);
 		}
-		Settings settings = Settings.settingsBuilder()
-				.put("cluster.name", clusterName).build();
-		TransportClient tClient = TransportClient.builder().settings(settings)
+		Settings settings = Settings.builder()
+				.put("cluster.name", clusterName)
+				.put("client.transport.sniff", true)
 				.build();
+		TransportClient tClient = new PreBuiltXPackTransportClient(settings);
 		List<String> addressList = Lists.newArrayList();
 		if (StringUtils.isBlank(inetAddress)) {
 			addressList.add("localhost:9300");

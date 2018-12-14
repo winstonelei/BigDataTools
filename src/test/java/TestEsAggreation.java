@@ -9,16 +9,13 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.avg.Avg;
 import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
 import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 
 import java.util.ArrayList;
@@ -38,7 +35,7 @@ public class TestEsAggreation {
             SearchRequestBuilder searchReq = esSearchManager.client.prepareSearch("tempindex");
             searchReq.setTypes("tempindex");
 
-            TermsBuilder termsb = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
+            TermsAggregationBuilder termsb = AggregationBuilders.terms("my_fieldA").field("fieldA").size(100);
 
             //过滤条件
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
