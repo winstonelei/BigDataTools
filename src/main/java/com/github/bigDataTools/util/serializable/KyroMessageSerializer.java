@@ -7,10 +7,6 @@ import java.util.Map;
 
 
 /**
- * 
- * @description <br>
- * @author <a href="mailto:vakinge@gmail.com">vakin</a>
- * @date 2016年6月14日
  */
 public class KyroMessageSerializer implements Serializer<Serializable> {
 

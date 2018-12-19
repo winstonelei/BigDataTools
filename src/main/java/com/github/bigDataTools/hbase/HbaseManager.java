@@ -1,5 +1,6 @@
 package com.github.bigDataTools.hbase;
 
+import com.github.bigDataTools.util.RunnerThreadPoolSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -7,11 +8,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hbase.util.MD5Hash;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by winstone on 2016/12/9.
@@ -223,11 +226,65 @@ public class HbaseManager {
         } catch (IOException e) {
             logger.error(e.getMessage());
         } finally {
-            HbaseManager.close();
+          //  HbaseManager.close();
         }
         return false;
     }
 
+
+
+    public  boolean insertMultiNew(Table table, String rowKey, String family, Map<String,Object> event) {
+        try {
+            Put put = new Put(Bytes.toBytes(rowKey));
+            Iterator<Map.Entry<String,Object>> iter = event.entrySet().iterator();
+            while (iter.hasNext()){
+                Map.Entry<String,Object> map=iter.next();
+                String qualifier = map.getKey();
+                String value = String.valueOf(map.getValue());
+                put.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier), Bytes.toBytes(value));
+            }
+            table.put(put);
+            return true;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        } finally {
+            //  HbaseManager.close();
+        }
+        return false;
+    }
+
+    public  List<Put> insertMultis(List<Put> list, String rowKey, String family, Map<String,Object> event) {
+        try {
+            Put put = new Put(Bytes.toBytes(rowKey));
+            Iterator<Map.Entry<String,Object>> iter = event.entrySet().iterator();
+            while (iter.hasNext()){
+                Map.Entry<String,Object> map=iter.next();
+                String qualifier = map.getKey();
+                String value = String.valueOf(map.getValue());
+                put.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier), Bytes.toBytes(value));
+            }
+            list.add(put);
+            return list;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return null;
+    }
+
+
+    public  boolean insertList(List<Put> list, String tableName) {
+        boolean flag = true;
+        try {
+            Table t = getConn().getTable(TableName.valueOf(tableName));
+            t.put(list);
+        } catch (Exception e) {
+            flag = false;
+            logger.error(e.getMessage());
+        } finally {
+              HbaseManager.close();
+        }
+        return flag;
+    }
 
     public  boolean del(String tableName, String rowKey, String family, String qualifier) {
         try {
@@ -345,7 +402,103 @@ public class HbaseManager {
         return results;
     }
 
+    public static long put(String tablename, List<Put> puts) throws Exception {
+        long currentTime = System.currentTimeMillis();
+        Connection conn =getConn();
+        final BufferedMutator.ExceptionListener listener = new BufferedMutator.ExceptionListener() {
+            @Override
+            public void onException(RetriesExhaustedWithDetailsException e, BufferedMutator mutator) {
+                for (int i = 0; i < e.getNumExceptions(); i++) {
+                    logger.error("Failed to sent put " + e.getRow(i) + ".");
+                }
+            }
+        };
+        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tablename))
+                .listener(listener);
+        params.writeBufferSize(5 * 1024 * 1024);
 
+        final BufferedMutator mutator = conn.getBufferedMutator(params);
+        try {
+            mutator.mutate(puts);
+            mutator.flush();
+        } finally {
+            mutator.close();
+            close();
+        }
+        return System.currentTimeMillis() - currentTime;
+    }
+
+    public static long putByHTable(String tablename, List<?> puts) throws Exception {
+        long currentTime = System.currentTimeMillis();
+        Connection conn = getConn();
+        HTable htable = (HTable) conn.getTable(TableName.valueOf(tablename));
+        htable.setAutoFlushTo(false);
+        htable.setWriteBufferSize(5 * 1024 * 1024);
+        try {
+            htable.put((List<Put>)puts);
+            htable.flushCommits();
+        } finally {
+            htable.close();
+            close();
+        }
+        return System.currentTimeMillis() - currentTime;
+    }
+
+    /**
+     * 多线程同步提交
+     * @param tableName  表名称
+     * @param puts  待提交参数
+     * @param waiting  是否等待线程执行完成  true 可以及时看到结果, false 让线程继续执行，并跳出此方法返回调用方主程序
+     */
+    public void batchPut(final String tableName, final List<Put> puts, boolean waiting) {
+        RunnerThreadPoolSupport.getExecutorService().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    long costTime = put(tableName, puts);
+                    System.out.println("costTime = "+costTime);
+                } catch (Exception e) {
+                    logger.error("batchPut failed . ", e);
+                }
+            }
+        });
+        if(waiting){
+            try {
+                ((ThreadPoolExecutor) RunnerThreadPoolSupport.getExecutorService()).awaitTermination(3000, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.error("HBase put job thread pool await termination time out.", e);
+            }
+        }
+    }
+
+    /**
+     * 多线程异步提交
+     * @param tableName  表名称
+     * @param puts  待提交参数
+     * @param waiting  是否等待线程执行完成  true 可以及时看到结果, false 让线程继续执行，并跳出此方法返回调用方主程序
+     */
+    public void batchAsyncPut(final String tableName, final List<Put> puts, boolean waiting) {
+        Future f = RunnerThreadPoolSupport.getExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    putByHTable(tableName, puts);
+                } catch (Exception e) {
+                    logger.error("batchPut failed . ", e);
+                }
+            }
+        });
+
+        if(waiting){
+            try {
+                f.get();
+            } catch (InterruptedException e) {
+                logger.error("多线程异步提交返回数据执行失败.", e);
+            } catch (ExecutionException e) {
+                logger.error("多线程异步提交返回数据执行失败.", e);
+            }
+        }
+    }
 
 }
 
