@@ -37,13 +37,17 @@ public class TestHbase {
             // util.createTable("firsttable","ceshi");
             long startTime = System.currentTimeMillis();
             System.out.println("start time ="+startTime);
-            for(int i=10;i<100000;i++){
+            for(int i=10;i<101000;i++){
                 String rowKey= MD5Hash.getMD5AsHex(Bytes.toBytes(System.currentTimeMillis()));
                 int rowKeyLength = rowKey.length()/2;
                 System.out.println(rowKey);
+               // util.insert("gztable",rowKey.substring(0,rowKeyLength),"ceshi","name","xiaoming"+i);
+                //util.insert("gztable",rowKey.substring(0,rowKeyLength),"ceshi","sex","xiaoming"+i);
+
                 util.insert("firsttable",rowKey.substring(0,rowKeyLength),"ceshi","name","xiaoming"+i);
                 util.insert("firsttable",rowKey.substring(0,rowKeyLength),"ceshi","sex","xiaoming"+i);
             }
+            HbaseManager.close();
             long endTime = System.currentTimeMillis();
             System.out.println("end time = "+endTime);
             System.out.println("cost time = "+(endTime-startTime));
@@ -52,6 +56,8 @@ public class TestHbase {
             e.printStackTrace();
         }
     }
+
+
 
 
 }
